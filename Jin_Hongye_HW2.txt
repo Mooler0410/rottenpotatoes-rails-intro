@@ -1,2 +1,2 @@
-https://github.com/Mooler0410/hw-rails-intro.git
+https://github.com/Mooler0410/rottenpotatoes-rails-intro.git
 https://serene-plains-19727.herokuapp.com/    
