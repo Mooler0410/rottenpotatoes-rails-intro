@@ -8,25 +8,32 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = Movie.all_ratings
-    if params[:ratings]
-      @ratings_to_show = params[:ratings].keys
+    
+    if params.empty?
+      @sort = session[:sort]
+      @ratings_to_show = session[:ratings_to_show]
     else
-      @ratings_to_show = @all_ratings
+      if params[:ratings]
+        @ratings_to_show = params[:ratings].keys
+      else
+        @ratings_to_show = @all_ratings
+      end
+      @movies = Movie.with_ratings(@ratings_to_show)
+      
+      @sort = params[:sort]
+      if @sort == 'title'
+          @title_header = 'hilite'
+          #@ratings_to_show = params['old_rat']
+          @movies= Movie.with_ratings(@ratings_to_show).order!(:title)
+      elsif @sort == 'release_date'
+          @release_date_header = 'hilite'
+          #@ratings_to_show = params['old_rat']
+          @movies= Movie.with_ratings(@ratings_to_show).order!(:release_date)
+      end
     end
-    @movies = Movie.with_ratings(@ratings_to_show)
     
-    @sort = params[:sort]
-    if @sort == 'title'
-        @title_header = 'hilite'
-        @ratings_to_show = params['old_rat']
-        @movies= Movie.with_ratings(@ratings_to_show).order!(:title)
-        #@movies.order!('release_date asc')
-    elsif @sort == 'release_date'
-        @release_date_header = 'hilite'
-        @ratings_to_show = params['old_rat']
-        @movies= Movie.with_ratings(@ratings_to_show).order!(:release_date)
-    end
-    
+    session[:sort] = @sort
+    session[:ratings_to_show] = @ratings_to_show
   end
 
   def new
