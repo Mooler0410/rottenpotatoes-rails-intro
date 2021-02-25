@@ -1,36 +1,39 @@
 class MoviesController < ApplicationController
-
+  @@reset_session = false
   def show
     id = params[:id] # retrieve movie ID from URI route
     @movie = Movie.find(id) # look up movie by unique ID
     # will render app/views/movies/show.<extension> by default
   end
-
+  
   def index
     @all_ratings = Movie.all_ratings
-    
-    if params.empty?
+    if not @@reset_session
+      @@reset_session = true # if you want to reset session, you have to exit and restart. 
+      reset_session
+      @ratings_to_show = @all_ratings
+    else
       @sort = session[:sort]
       @ratings_to_show = session[:ratings_to_show]
-    else
-      if params[:ratings]
-        @ratings_to_show = params[:ratings].keys
-      else
-        @ratings_to_show = @all_ratings
-      end
-      @movies = Movie.with_ratings(@ratings_to_show)
-      
+    end  
+
+    if params[:commit] == 'Refresh'
+      @ratings_to_show = params[:ratings].keys
+    elsif params[:sort]
       @sort = params[:sort]
-      if @sort == 'title'
-          @title_header = 'hilite'
-          #@ratings_to_show = params['old_rat']
-          @movies= Movie.with_ratings(@ratings_to_show).order!(:title)
-      elsif @sort == 'release_date'
-          @release_date_header = 'hilite'
-          #@ratings_to_show = params['old_rat']
-          @movies= Movie.with_ratings(@ratings_to_show).order!(:release_date)
-      end
+    end  
+    
+    @movies = Movie.with_ratings(@ratings_to_show)
+    
+    if @sort == 'title'
+      @title_header = 'hilite'
+      @movies= @movies.order!(:title)
+      puts @movies
+    elsif @sort == 'release_date'
+      @release_date_header = 'hilite'
+      @movies= @movies.order!(:release_date)
     end
+  
     
     session[:sort] = @sort
     session[:ratings_to_show] = @ratings_to_show
